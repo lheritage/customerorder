@@ -1,0 +1,83 @@
+{
+	"schemaVersion": "3",
+	"info": {
+		"name": "postCustomerById"
+	},
+	"parameter": {
+		"properties": {
+			"params": {
+				"type": "object",
+				"description": "The parameters from the endpoint."
+			},
+			"request": {
+				"type": "object",
+				"description": "The HTTP request."
+			},
+			"config": {
+				"type": "object",
+				"description": "The service's configuration"
+			},
+			"env": {
+				"type": "object",
+				"description": "The host OS environment"
+			}
+		},
+		"additionalProperties": false,
+		"required": [
+			"params",
+			"request",
+			"config",
+			"env"
+		]
+	},
+	"start": "customer.1",
+	"nodes": {
+		"http.setresponse.1": {
+			"type": "nodehandler://axway-flow/http",
+			"method": "setresponse",
+			"name": "Set HTTP Response",
+			"parameters": [
+				{
+					"name": "status",
+					"value": "200",
+					"type": "number"
+				},
+				{
+					"name": "body",
+					"type": "jsonpath",
+					"value": "$.response.data"
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.response"
+				}
+			}
+		},
+		"customer.1": {
+			"type": "nodehandler://@axway/api-builder-plugin-fn-swagger/customer",
+			"name": "postCustomerById",
+			"method": "postCustomerById",
+			"parameters": [
+				{
+					"name": "id",
+					"type": "jsonpath",
+					"value": "$.params.id"
+				},
+				{
+					"name": "body",
+					"type": "jsonpath",
+					"value": "$.request.body"
+				}
+			],
+			"outputs": {
+				"201": {
+					"routes": [
+						"http.setresponse.1"
+					],
+					"context": "$.response"
+				}
+			}
+		}
+	}
+}
